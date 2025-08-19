@@ -1,61 +1,47 @@
 "use client";
-
 import { useState } from "react";
+import Header from "./Header";
+import jsPDF from "jspdf";
 
 export default function Home() {
-  const [file, setFile] = useState(null);
-
+  const [fileSelected, setFileSelected] = useState(false);
+  const [fileName, setFileName] = useState("");
+  // ...existing code...
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  const file = e.target.files[0];
+  setFileSelected(!!file);
+  setFileName(file ? file.name : "");
   };
 
-  const handleSubmit = () => {
-    if (file) {
-      alert(`Uploaded: ${file.name}`);
-      // TODO: Add API call to actually upload the file
-    } else {
-      alert("Please select a file first.");
-    }
-  };
+  // ...existing code...
 
   return (
-    <div className="font-sans flex flex-col items-center justify-center min-h-screen p-8 gap-12 bg-gradient-to-b from-blue-50 to-white">
-      
-      {/* Header Text */}
-      <div className="max-w-3xl text-center">
-        <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 text-gray-900">
-          Upload Your Application Documents
-        </h1>
-        <p className="text-lg sm:text-xl text-gray-600">
-          Ensure your file includes all required documents and proof of payment.
-          Only PDF or image formats are accepted.
-        </p>
-      </div>
-
-      {/* Upload Box */}
-      <div className="bg-white shadow-lg rounded-3xl p-8 w-full max-w-lg flex flex-col items-center gap-4">
-        <input
-          type="file"
-          accept=".pdf, image/*"
-          className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          onChange={handleFileChange}
-        />
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-blue-600 text-white font-medium py-3 px-6 rounded-2xl hover:bg-blue-700 transition-all duration-300"
-        >
-          Upload Document
-        </button>
-        {file && (
-          <p className="mt-2 text-sm text-gray-500">Selected File: {file.name}</p>
-        )}
-      </div>
-
-      {/* Footer Note */}
-      <p className="text-sm text-gray-400 mt-6 max-w-md text-center">
-        Your documents are securely uploaded. Make sure all required files are included.
-      </p>
-    </div>
+  <main className="min-h-screen bg-gray-50 flex flex-col items-center p-0">
+      <div className="w-full sticky top-0 z-20"><Header /></div>
+      <section className="w-full min-h-[60vh] bg-white rounded-none sm:rounded-2xl shadow-2xl p-4 sm:p-12 mt-6 flex flex-col gap-8 border border-blue-100">
+        <form className="flex flex-col gap-8 w-full">
+          <div className="w-full">
+            <label htmlFor="resume" className="block text-2xl font-bold mb-4 text-blue-900">Upload Resume (PDF)</label>
+            <input
+              type="file"
+              id="resume"
+              name="resume"
+              accept="application/pdf"
+              className={`w-full border rounded-none sm:rounded-xl px-4 sm:px-6 py-4 sm:py-5 text-xl transition-all text-gray-900 placeholder-gray-500 focus:border-blue-600 focus:bg-blue-100 cursor-pointer ${fileSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}`}
+              onChange={handleFileChange}
+            />
+            {fileSelected && fileName && (
+              <span className="block mt-3 text-lg font-bold text-gray-900">{fileName}</span>
+            )}
+          </div>
+          <div className="w-full">
+            <label htmlFor="jobRequirements" className="block text-2xl font-bold mb-4 text-blue-900">Job Requirements</label>
+            <textarea id="jobRequirements" name="jobRequirements" rows={14} placeholder="Paste job requirements here..." className="w-full border rounded-none sm:rounded-xl px-4 sm:px-6 py-4 sm:py-5 text-xl resize-none text-gray-900 placeholder-gray-500" />
+          </div>
+          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-none sm:rounded-xl hover:bg-blue-700 transition text-xl">Generate Cover Letter</button>
+        </form>
+      </section>
+    </main>
   );
 }
 
