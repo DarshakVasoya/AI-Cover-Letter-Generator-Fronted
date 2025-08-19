@@ -1,15 +1,20 @@
 import Logo from "./Logo";
 
+// Responsive, flexible header: adjusts padding, layout, and font sizes per breakpoint
 export default function Header() {
-  return (
-    <header className="w-full h-16 sm:h-20 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-400 flex items-center shadow-lg mb-2">
-      <div className="flex items-center w-full px-2 sm:px-6">
-        <Logo />
-        <div className="ml-4 text-left">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white drop-shadow-lg mb-1">AI Cover Letter Generator</h1>
-          <p className="text-xs sm:text-sm text-white/90">Generate a professional cover letter instantly by uploading your resume and entering job requirements. Powered by AI for tailored results.</p>
-        </div>
-      </div>
-    </header>
-  );
+	return (
+		<header className="w-full bg-gradient-to-r from-blue-600 via-purple-500 to-pink-400 shadow-lg sticky top-0 z-30">
+			<div className="flex flex-row items-center gap-3 sm:gap-4 w-full px-3 sm:px-6 py-2.5 sm:py-3 md:py-4">
+				<Logo />
+				<div className="flex flex-col min-w-0">
+					<h1 className="text-white font-extrabold leading-tight whitespace-nowrap text-base sm:text-lg md:text-2xl xl:text-3xl">
+						AI Cover Letter Generator
+					</h1>
+					<p className="text-white/90 text-[10px] sm:text-xs md:text-sm xl:text-base leading-snug hidden sm:block truncate">
+						Generate tailored cover letters from your resume & job requirements.
+					</p>
+				</div>
+			</div>
+		</header>
+	);
 }

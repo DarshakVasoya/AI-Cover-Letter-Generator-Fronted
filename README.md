@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## AI Cover Letter Generator (Frontend)
 
-## Getting Started
+Responsive Next.js interface to upload a resume (PDF), paste job requirements, and generate / edit a tailored cover letter. PDF download supported (client-side via jsPDF). Backend (Flask) will handle future AI generation & server‑side PDF text extraction.
 
-First, run the development server:
+Deployed: https://web-production-55202.up.railway.app/
 
+### Key Features
+- Resume PDF upload with filename preview & highlight state
+- Job requirements textarea (large, responsive)
+- Generated cover letter editable pane (side-by-side on desktop, stacked on mobile)
+- Download cover letter as PDF (jsPDF)
+- Sticky responsive header with custom SVG logo
+- Fully utility‑driven styling (Tailwind CSS)
+
+### Roadmap
+- Integrate Flask API (resume + job requirements → AI cover letter)
+- Server-side PDF text extraction (pypdf)
+- Loading / error states & validation
+- Copy to clipboard & version history
+- Model prompt tuning + personalization fields
+- Dark mode
+
+### Local Development
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Open http://localhost:3000
+
+### Environment / API
+Default API base (if env var unset): https://web-production-55202.up.railway.app
+
+You can override with an environment variable:
+
+Add to a `.env.local` file (not committed):
+```
+NEXT_PUBLIC_API_BASE=https://web-production-55202.up.railway.app
+```
+During local backend dev:
+```
+NEXT_PUBLIC_API_BASE=http://localhost:5000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Suggested Flask Endpoint (planned)
+POST /generate (multipart/form-data)
+Fields: resume (file), job_requirements (text)
+Returns: { cover_letter, resume_text }
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Tech Stack
+- Next.js 15 App Router
+- React 19
+- Tailwind CSS 4
+- jsPDF
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### License
+MIT – see `LICENSE`.
 
-## Learn More
+### Author
+Darshak Vasoya (c) 2025
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+PRs & issues welcome.
