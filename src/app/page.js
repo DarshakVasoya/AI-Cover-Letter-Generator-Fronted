@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "./Header";
-import jsPDF from "jspdf";
 import { generateCoverLetterAPI } from "../lib/api";
+import { exportCoverLetterToPDF } from "../lib/pdf";
 
 export default function Home() {
   const [fileSelected, setFileSelected] = useState(false);
@@ -13,7 +13,27 @@ export default function Home() {
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const coverLetterRef = useRef(null);
+  const liveRegionRef = useRef(null);
   const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB
+
+  // Load drafts from localStorage
+  useEffect(() => {
+    try {
+      const savedJD = localStorage.getItem('draft_job_description');
+      const savedCL = localStorage.getItem('draft_cover_letter');
+      if (savedJD) setJobDescription(savedJD);
+      if (savedCL) setCoverLetter(savedCL);
+    } catch {}
+  }, []);
+
+  // Persist drafts
+  useEffect(() => {
+    try { localStorage.setItem('draft_job_description', jobDescription); } catch {}
+  }, [jobDescription]);
+  useEffect(() => {
+    try { localStorage.setItem('draft_cover_letter', coverLetter); } catch {}
+  }, [coverLetter]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -47,11 +67,9 @@ export default function Home() {
         resumeFile,
         jobRequirements: jobDescription,
       });
-      if (data.cover_letter) setCoverLetter(data.cover_letter);
-      else if (data.coverLetter) setCoverLetter(data.coverLetter);
-      if (!data.cover_letter && !data.coverLetter) {
-        setCoverLetter("(No cover letter returned by API)");
-      }
+  let text = data.cover_letter || data.coverLetter || "(No cover letter returned by API)";
+  setCoverLetter(text);
+  setTimeout(() => { coverLetterRef.current?.focus(); }, 50);
     } catch (err) {
       setError(err.message || "Failed to generate.");
     } finally {
@@ -59,114 +77,7 @@ export default function Home() {
     }
   };
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const marginX = 56; // 0.78in
-    const marginTop = 64;
-    const lineHeight = 16;
-    const maxWidth = pageWidth - marginX * 2;
-
-    doc.setFont('Times', 'Normal');
-    doc.setFontSize(12);
-
-    const raw = (coverLetter || '').replace(/\r\n?/g, '\n').trim();
-    if (!raw) {
-      doc.text('No cover letter content.', marginX, marginTop);
-      doc.save('cover-letter.pdf');
-      return;
-    }
-    // Group into paragraphs separated by blank lines
-    const rawLines = raw.split(/\n/);
-    const paragraphs = [];
-    let buffer = [];
-    rawLines.forEach(line => {
-      if (line.trim() === '') {
-        if (buffer.length) { paragraphs.push(buffer.join(' ')); buffer = []; }
-        paragraphs.push(''); // marker for blank line
-      } else {
-        buffer.push(line.trim());
-      }
-    });
-    if (buffer.length) paragraphs.push(buffer.join(' '));
-
-    const justifyLine = (text, targetWidth) => {
-      const words = text.trim().split(/\s+/);
-      if (words.length < 2) return text; // can't justify
-      // Initial width
-      const measure = (t) => doc.getTextWidth(t) * (12 / doc.getFontSize());
-      let base = words.join(' ');
-      let w = measure(base);
-      if (w >= targetWidth * 0.97) return base; // already close
-      const gaps = words.length - 1;
-      // Estimate additional spaces needed
-      const spaceWidth = measure(' ');
-      let extraSpaces = Math.max(0, Math.floor((targetWidth - w) / spaceWidth));
-      if (!extraSpaces) return base;
-      const basePerGap = Math.floor(extraSpaces / gaps);
-      let remainder = extraSpaces % gaps;
-      let out = '';
-      words.forEach((word, i) => {
-        out += word;
-        if (i < gaps) {
-          let count = 1 + basePerGap + (remainder > 0 ? 1 : 0);
-          if (remainder > 0) remainder--;
-          out += ' '.repeat(count);
-        }
-      });
-      return out;
-    };
-
-    let cursorY = marginTop;
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const bottomLimit = pageHeight - 72;
-
-    paragraphs.forEach(para => {
-      if (para === '') {
-        // blank line
-        cursorY += lineHeight;
-        return;
-      }
-      // Wrap paragraph into lines
-      const words = para.split(/\s+/);
-      let lines = [];
-      let current = '';
-      words.forEach(word => {
-        const test = current ? current + ' ' + word : word;
-        const width = doc.getTextWidth(test) * (12 / doc.getFontSize());
-        if (width > maxWidth && current) {
-          lines.push(current);
-          current = word;
-        } else {
-          current = test;
-        }
-      });
-      if (current) lines.push(current);
-
-      lines.forEach((line, idx) => {
-        if (cursorY > bottomLimit) {
-          doc.addPage();
-          cursorY = marginTop;
-        }
-        let outLine = line;
-        const isLast = idx === lines.length - 1;
-        if (!isLast && line.length > 20) {
-          outLine = justifyLine(line, maxWidth);
-        }
-        doc.text(outLine, marginX, cursorY);
-        cursorY += lineHeight;
-      });
-      cursorY += lineHeight * 0.5; // paragraph spacing
-    });
-
-    // Closing footer (optional placeholder)
-    if (cursorY + lineHeight * 2 < bottomLimit) {
-      doc.setFontSize(10);
-      doc.setTextColor(120);
-      doc.text('Generated by AI Cover Letter Generator', marginX, pageHeight - 40);
-    }
-    doc.save('cover-letter.pdf');
-  };
+  const handleDownloadPDF = () => exportCoverLetterToPDF(coverLetter);
 
   return (
   <main className="h-screen bg-gradient-to-br from-slate-50 via-gray-100 to-slate-200 flex flex-col items-center p-0 relative">
@@ -205,7 +116,7 @@ export default function Home() {
               />
             </div>
             <div className="mt-3">
-              <button type="submit" disabled={loading || !resumeFile || !jobDescription.trim()} className="relative w-full bg-gradient-to-r from-blue-600 to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-md hover:from-blue-500 hover:to-indigo-500 transition text-sm sm:text-base shadow flex items-center justify-center">
+              <button type="submit" disabled={loading || !resumeFile || !jobDescription.trim()} className="relative w-full bg-gradient-to-r from-blue-600 to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-md hover:from-blue-500 hover:to-indigo-500 transition text-sm sm:text-base shadow flex items-center justify-center" aria-live="polite">
                 {loading ? (
                   <span className="flex items-center gap-2">
                     <span className="btn-spinner" aria-hidden="true" />
@@ -234,8 +145,10 @@ export default function Home() {
               value={coverLetter}
               onChange={e => setCoverLetter(e.target.value)}
               placeholder="Your generated cover letter will appear here..."
-              className="w-full flex-1 mt-1 border rounded px-3 py-3 text-sm sm:text-base leading-relaxed resize-none text-gray-900 font-serif min-h-[160px] focus:border-emerald-600 focus:ring-2 focus:ring-emerald-200 bg-white/70 text-justify"
+              ref={coverLetterRef}
+              className="w-full flex-1 mt-1 border rounded px-3 py-3 text-sm sm:text-base leading-relaxed resize-none text-gray-900 font-serif min-h-[160px] focus:border-emerald-600 focus:ring-2 focus:ring-emerald-200 bg-white/70 text-justify outline-none focus:outline-none"
             />
+            <div ref={liveRegionRef} className="sr-only" aria-live="polite">{loading ? 'Generating cover letter' : 'Idle'}</div>
           </div>
           <div className="mt-4 flex gap-3 flex-wrap">
             <button onClick={handleDownloadPDF} className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold py-2.5 rounded-md hover:from-emerald-500 hover:to-teal-500 transition text-sm sm:text-base shadow">Download PDF</button>
