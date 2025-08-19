@@ -1,20 +1,17 @@
+"use client";
 import Logo from "./Logo";
 
-// Responsive, flexible header: adjusts padding, layout, and font sizes per breakpoint
 export default function Header() {
 	return (
-		<header className="w-full bg-gradient-to-r from-blue-600 via-purple-500 to-pink-400 shadow-lg sticky top-0 z-30">
-			<div className="flex flex-row items-center gap-3 sm:gap-4 w-full px-3 sm:px-6 py-2.5 sm:py-3 md:py-4">
-				<Logo />
-				<div className="flex flex-col min-w-0">
-					<h1 className="text-white font-extrabold leading-tight whitespace-nowrap text-base sm:text-lg md:text-2xl xl:text-3xl">
-						AI Cover Letter Generator
-					</h1>
-					<p className="text-white/90 text-[10px] sm:text-xs md:text-sm xl:text-base leading-snug hidden sm:block truncate">
-						Generate tailored cover letters from your resume & job requirements.
-					</p>
-				</div>
-			</div>
-		</header>
+				<header className="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+					<div className="w-full px-4 sm:px-6 py-2 flex flex-col gap-0.5">
+						<div className="flex items-center gap-3 justify-start">
+							<Logo size={40} />
+							<h1 className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap">AI Cover Letter Generator</h1>
+							<span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-medium text-slate-500 bg-slate-100/70 px-2 py-0.5 rounded hidden sm:inline-flex">Beta</span>
+						</div>
+					<p className="pl-[52px] text-xs sm:text-sm text-slate-500 tracking-wide hidden sm:block">Generate tailored cover letters from your resume & job requirements.</p>
+					</div>
+				</header>
 	);
 }

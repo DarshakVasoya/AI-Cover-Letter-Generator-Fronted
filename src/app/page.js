@@ -169,7 +169,7 @@ export default function Home() {
   };
 
   return (
-  <main className="h-screen bg-gradient-to-br from-slate-50 via-gray-100 to-slate-200 flex flex-col items-center p-0">
+  <main className="h-screen bg-gradient-to-br from-slate-50 via-gray-100 to-slate-200 flex flex-col items-center p-0 relative">
       <div className="w-full sticky top-0 z-20"><Header /></div>
   <section className="w-full h-[92%] flex flex-col md:flex-row gap-5 p-3 sm:p-8">
         {/* Form Section */}
@@ -203,8 +203,15 @@ export default function Home() {
               />
             </div>
             <div className="mt-3">
-              <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-md hover:from-blue-500 hover:to-indigo-500 transition text-sm sm:text-base shadow">
-                {loading ? 'Generating...' : 'Generate Cover Letter'}
+              <button type="submit" disabled={loading} className="relative w-full bg-gradient-to-r from-blue-600 to-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-md hover:from-blue-500 hover:to-indigo-500 transition text-sm sm:text-base shadow flex items-center justify-center">
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="btn-spinner" aria-hidden="true" />
+                    <span>Generating...</span>
+                  </span>
+                ) : (
+                  <span>Generate Cover Letter</span>
+                )}
               </button>
             </div>
             {error && <p className="mt-2 text-sm text-red-600 font-medium">{error}</p>}
